@@ -9,6 +9,7 @@ import TableCell from '@material-ui/core/TableCell';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = theme => ({
   root: {
@@ -23,13 +24,27 @@ const styles = theme => ({
 
 class App extends React.Component {
   state = {
-    customers: []
+    customers: null,
+    completed: 0
   };
 
+  componentWillUnmount() {
+    console.log(`this timer: ${this.timer}`);
+    clearInterval(this.timer);
+  }
+
   componentDidMount() {
+    this.timer = setInterval(this.progress, 30);
+    console.log(this.timer);  
     this.callApi()
-      .then(res => this.setState({customers: res}))
-      .catch(err => console.log(err));
+      .then(res => {
+        this.setState({customers: res});
+        clearInterval(this.timer);
+      })
+      .catch(err => {
+        console.log(err);
+        clearInterval(this.timer);
+      });
   }
 
   callApi = async () => {
@@ -38,6 +53,12 @@ class App extends React.Component {
     return body;
   }
   
+  progress = () => {
+    const { completed } = this.state;
+    //console.log(completed, this.timer);
+    this.setState({completed: completed >= 100 ? 0 : completed + 1});
+  }
+
   render() {
     const { classes } = this.props;
     return (
@@ -54,7 +75,15 @@ class App extends React.Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            { this.state.customers.map(c=>{ return ( <Customer  key={c.id} id={c.id} image={c.image} name={c.name} birthday={c.birthday} gender={c.gender} job={c.job} /> ) }) }
+            { this.state.customers? this.state.customers.map(c => { 
+                return ( <Customer  key={c.id} id={c.id} image={c.image} name={c.name} birthday={c.birthday} gender={c.gender} job={c.job} /> ) 
+              }) : 
+              <TableRow>
+                <TableCell colSpan="6" align="center">
+                  <CircularProgress className={classes.progress} ></CircularProgress>
+                </TableCell>
+              </TableRow>
+            }
           </TableBody>
         </Table>
         <Button variant="contained" color="primary">
