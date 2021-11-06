@@ -1,5 +1,6 @@
 import React from 'react';
-import { TableRow, TableCell } from '@material-ui/core';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
 
 class Customer extends React.Component {
     render() {
