@@ -87,7 +87,7 @@ class App extends React.Component {
           </TableBody>
         </Table>
         <Button variant="contained" color="primary">
-          Hello World
+          Hello World 2
         </Button>
       </Paper>
     );
