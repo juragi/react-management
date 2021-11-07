@@ -14,7 +14,7 @@ const conf = {
   user: process.env.MARIA_USER,
   password: process.env.MARIA_PASSWORD,
   port: process.env.MARIA_PORT,
-  database: process.env.MARIA_PORT
+  database: process.env.MARIA_DATABASE
 }
 const mysql = require('mysql');
 
