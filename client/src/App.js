@@ -1,6 +1,7 @@
 import './App.css';
 import React from 'react';
 import Customer from "./components/Customer";
+import CustomerAdd from "./components/CustomerAdd";
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
@@ -23,10 +24,31 @@ const styles = theme => ({
 })
 
 class App extends React.Component {
-  state = {
-    customers: null,
-    completed: 0
-  };
+  
+  constructor(props) {
+    super(props);
+    this.state = {
+      customers: [],
+      completed: 0
+    }
+  }
+
+  stateRefresh = () => {
+    this.setState({
+      customers: [],
+      completed: 0
+    });
+    this.callApi()
+      .then(res => {
+        this.setState({customers: res});
+      })
+      .catch(err => {
+        console.log(err);
+      })
+      .finally(()=>{
+        clearInterval(this.timer);
+      });
+  }
 
   componentWillUnmount() {
     console.log(`this timer: ${this.timer}`);
@@ -39,10 +61,11 @@ class App extends React.Component {
     this.callApi()
       .then(res => {
         this.setState({customers: res});
-        clearInterval(this.timer);
       })
       .catch(err => {
         console.log(err);
+      })
+      .finally(()=>{
         clearInterval(this.timer);
       });
   }
@@ -62,6 +85,7 @@ class App extends React.Component {
   render() {
     const { classes } = this.props;
     return (
+      <div>
       <Paper className={classes.root}>
         <Table className={classes.table}>
           <TableHead>
@@ -86,10 +110,10 @@ class App extends React.Component {
             }
           </TableBody>
         </Table>
-        <Button variant="contained" color="primary">
-          Hello World 2
-        </Button>
+        
       </Paper>
+      <CustomerAdd stateRefresh={this.stateRefresh}/>
+      </div>
     );
   }
 }

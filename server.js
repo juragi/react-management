@@ -37,7 +37,8 @@ app.get('/api/hello', (req, res) => {
     res.send({message: "Hello Express"});
 });
 
-
+const multer = require('multer');
+const upload = multer({dest: './upload'});
 
 app.get("/api/customers", (req, res) => {
     //res.send(customers);
@@ -70,5 +71,31 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname+'/client/build/index.html'));
 });
+
+app.use('/image', express.static('./upload'));
+
+app.post('/api/customers', upload.single('image'), (req, res) => {
+  let sql = 'insert into customer (image, name, birthday, gender, job) values (?, ?, ?, ?, ?)';
+  let image = '/image/' + req.file.filename;
+  let name = req.body.name;
+  let birthday = req.body.birthday;
+  let gender = req.body.gender;
+  let job = req.body.job;
+  let params = [image, name, birthday, gender, job];
+  pool.getConnection()
+    .then(conn=>{
+      conn.query(sql, params)
+        .then(response=>{
+          console.log(response);
+          res.send(response);
+        })
+        .finally(() => {
+          if(conn) conn.release();
+        })
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+})
 
 app.listen(port, () => {console.log(`Listening on ${port}`)});
