@@ -34,10 +34,10 @@ class App extends React.Component {
   }
 
   stateRefresh = () => {
-    this.setState({
-      customers: [],
-      completed: 0
-    });
+    //this.setState({
+    //  customers: [],
+    //  completed: 0
+    //});
     this.callApi()
       .then(res => {
         this.setState({customers: res});
@@ -86,7 +86,7 @@ class App extends React.Component {
     const { classes } = this.props;
     return (
       <div>
-      <Paper className={classes.root}>
+      <Paper className={classes.root} style={{maxHeight: 500, overflow:"auto"}}>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>

@@ -46,7 +46,7 @@ app.get("/api/customers", (req, res) => {
     let rows;
     pool.getConnection()
       .then(conn => {
-        conn.query("select * from customer")
+        conn.query("select * from customer order by id desc")
           .then(rows=>{
             res.send(rows);
           })
