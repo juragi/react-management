@@ -14,18 +14,24 @@ const conf = {
   user: process.env.MARIA_USER,
   password: process.env.MARIA_PASSWORD,
   port: process.env.MARIA_PORT,
-  database: process.env.MARIA_DATABASE
+  database: process.env.MARIA_DATABASE,
+  connectionLimit: 5
 }
-const mysql = require('mysql');
+const mariadb = require('mariadb');
+const pool = mariadb.createPool(conf);
+//const connection = mysql.createConnection({
+//  host: conf.host,
+//  user: conf.user,
+//  password: conf.password,
+//  port: conf.port,
+//  database: conf.database
+//});
+//connection.connect();
 
-const connection = mysql.createConnection({
-  host: conf.host,
-  user: conf.user,
-  password: conf.password,
-  port: conf.port,
-  database: conf.database
-});
-connection.connect();
+async function getConnection(){
+  var conn  = await pool.getConnection();
+  return conn;
+}
 
 app.get('/api/hello', (req, res) => {
     res.send({message: "Hello Express"});
@@ -35,12 +41,28 @@ app.get('/api/hello', (req, res) => {
 
 app.get("/api/customers", (req, res) => {
     //res.send(customers);
-    connection.query(
-      "select * from customer",
-      (err, rows, fields) => {
-        res.send(rows);
-      }
-    )
+    let conn;
+    let rows;
+    pool.getConnection()
+      .then(conn => {
+        conn.query("select * from customer")
+          .then(rows=>{
+            res.send(rows);
+          })
+          .finally(()=>{
+            if(conn) conn.release();
+          });
+      })
+      .catch(err=>{
+        console.log(err);
+      })
+    
+    //connection.query(
+    //  "select * from customer",
+    //  (err, rows, fields) => {
+    //    res.send(rows);
+    //  }
+    //)
 });
 
 app.use(express.static(path.join(__dirname, 'client/build')));
