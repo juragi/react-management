@@ -46,7 +46,7 @@ app.get("/api/customers", (req, res) => {
     let rows;
     pool.getConnection()
       .then(conn => {
-        conn.query("select * from customer order by id desc")
+        conn.query("select * from customer where isDeleted = 0 order by id desc")
           .then(rows=>{
             res.send(rows);
           })
@@ -75,7 +75,8 @@ app.get('/', (req, res) => {
 app.use('/image', express.static('./upload'));
 
 app.post('/api/customers', upload.single('image'), (req, res) => {
-  let sql = 'insert into customer (image, name, birthday, gender, job) values (?, ?, ?, ?, ?)';
+  let sql = `insert into customer (image, name, birthday, gender, job, createdDate, isDeleted)
+                 values (?, ?, ?, ?, ?, now(), 0)`;
   let image = '/image/' + req.file.filename;
   let name = req.body.name;
   let birthday = req.body.birthday;
@@ -92,6 +93,25 @@ app.post('/api/customers', upload.single('image'), (req, res) => {
         .finally(() => {
           if(conn) conn.release();
         })
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+});
+
+app.delete('/api/customers/:id', (req, res) =>{
+  let sql = "update customer set isDeleted = 1 where id = ?";
+  let params = [req.params.id];
+  pool.getConnection()
+    .then(conn=> {
+      conn.query(sql, params)
+        .then(response=>{
+          console.log(response);
+          res.send(response);
+        })
+        .finally(()=>{
+          if(conn) conn.release();
+        });
     })
     .catch(err=>{
       console.log(err);
